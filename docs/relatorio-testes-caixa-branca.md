@@ -2,20 +2,16 @@
 
 **Disciplina:** Engenharia de Software III
 **Atividade:** Testes de Técnica de Caixa Branca
-**Versão do código analisado:** commit `c7ae92a` (branch `main`)
-
-> Documento em elaboração. Seções 1-5 estão preenchidas a partir do
-> planejamento estrutural do código. Seções 6-8 têm partes marcadas como
-> `🔲 A PREENCHER`, que devem ser completadas depois que os testes forem
-> implementados em `tests.py` e executados com `pytest --cov`.
+**Versão do código analisado:** commit `216965b` (branch `main`) — `models.py` inalterado desde `c7ae92a`; `216965b` adicionou a implementação dos testes em `test_conta.py`.
 
 ## 1. Identificação da equipe e do projeto
 
-- **Integrantes:** _(preencher nomes e matrículas)_
+- **Integrantes:** Nicolas Damasceno, Amanda Santos
 - **Projeto:** Mini sistema bancário (Pessoa, Banco, Conta)
 - **Linguagem:** Python 3.12
 - **Arquivo analisado:** [`models.py`](../models.py)
 - **Classe / método analisado:** `Conta.transferir` (linhas 39-66)
+- **Arquivo de testes:** [`test_conta.py`](../test_conta.py)
 
 ## 2. Código selecionado e regra de negócio
 
@@ -114,17 +110,23 @@ N10→N11 (V), N10→N12 (F), N11→N14, N12→N13, N13→N14.
 
 - **V(G) = E - N + 2P = 18 - 14 + 2(1) = 6**
 - **V(G) = D + 1 = 5 + 1 = 6**
-- **Resultado de ferramenta (Radon):** 🔲 A PREENCHER — rodar
-  `radon cc models.py -s` e colar o resultado para `transferir`.
+- **Resultado de ferramenta (Radon):**
 
-As decisões consideradas são as cinco estruturas `if` do método (linhas
-47, 50, 53, 56, 59). As condições compostas com `and` das linhas 53 e 56
-foram contabilizadas como **um único ponto de decisão cada** (é assim que
-Radon e a maioria das ferramentas de complexidade ciclomática por
-McCabe contam decisões simples; se a ferramenta usada pela dupla contar
-cada operador `and`/`or` como uma decisão adicional, o valor pode
-aparecer como 8 em vez de 6 — nesse caso, documentar a diferença aqui,
-não ajustar o código para "forçar" a coincidência).
+```
+$ radon cc models.py -s
+models.py
+    M 39:4 Conta.transferir - B (8)
+```
+
+Radon aponta **complexidade 8** para `transferir`, e não 6 como no cálculo
+manual. A diferença é explicada pela forma como cada ferramenta conta
+decisões: no cálculo manual contamos **cada `if` como um ponto de
+decisão** (5 ifs → D=5 → V(G)=6), enquanto Radon (assim como o McCabe
+"estendido") conta **cada operador booleano (`and`/`or`) dentro de uma
+condição como uma decisão adicional**. As linhas 53 e 56 têm um `and`
+cada, então Radon soma +2 decisões (5 ifs + 2 `and` = 7 → V(G) = 7+1 = 8).
+Essa divergência é esperada e documentada aqui — o código não foi alterado
+para forçar os números a coincidirem, conforme orientado no enunciado.
 
 **Conclusão:** são necessários **6 caminhos básicos** e, no mínimo,
 **6 casos de teste** para satisfazer o critério de caminhos. Casos
@@ -174,27 +176,102 @@ comportamento é intencional.
 
 ## 7. Execução, cobertura e análise dos resultados
 
-🔲 A PREENCHER pela dupla após implementar `tests.py` e rodar:
+Comandos executados:
 
 ```bash
-pytest tests.py -v
-pytest tests.py --cov=models --cov-branch --cov-report=html
+pytest test_conta.py -v
+pytest test_conta.py --cov=models --cov-branch --cov-report=term-missing --cov-report=html
 radon cc models.py -s
 ```
 
-Perguntas a responder nesta seção (ver enunciado da atividade):
+Resultado da execução dos 8 testes:
 
-1. Todos os testes passaram? Se não, qual falha e qual a causa?
-2. Percentual de cobertura de linhas e de ramos obtido em `transferir`.
-3. Todos os nós e arestas do GFC foram cobertos? (mostrar tabela CT ↔ nó/aresta)
-4. Os 6 caminhos básicos foram exercitados?
-5. Houve trecho inalcançável, caminho inviável, retorno antecipado ou exceção não coberta?
-6. A ferramenta (Radon) calculou a mesma complexidade (6)? Se não, explicar a diferença (ver observação da seção 4 sobre contagem de `and`/`or`).
-7. Os testes revelaram defeito, ambiguidade de requisito (ver CT-08) ou oportunidade de refatoração?
+```
+test_conta.py::test_ct01_valor_invalido PASSED
+test_conta.py::test_ct02_transferencia_para_a_propria_conta PASSED
+test_conta.py::test_ct03_poupanca_para_poupanca_bloqueada PASSED
+test_conta.py::test_ct04_corrente_para_outro_banco_bloqueada PASSED
+test_conta.py::test_ct05_saldo_insuficiente PASSED
+test_conta.py::test_ct06_transferencia_corrente_para_corrente_com_sucesso PASSED
+test_conta.py::test_ct07_poupanca_para_corrente_com_sucesso PASSED
+test_conta.py::test_ct08_poupanca_para_corrente_banco_diferente_com_sucesso PASSED
+
+8 passed in 0.09s
+```
+
+Cobertura obtida:
+
+```
+Name        Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------
+models.py      78     16     24      3    75%   23, 29-37, 69, 72, 90, 98, 110, 115
+-------------------------------------------------------
+TOTAL          78     16     24      3    75%
+```
+
+Respostas às perguntas da atividade:
+
+1. **Todos os testes passaram?** Sim, os 8 testes de `test_conta.py`
+   passaram sem falhas.
+2. **Cobertura de linhas/ramos:** o arquivo `models.py` como um todo tem
+   75% de cobertura, mas as linhas e ramos **faltantes (23, 29-37, 69, 72,
+   90, 98, 110, 115) pertencem a outros métodos** (`Conta.sacar`,
+   `Conta.depositar`, `Conta.__repr__`, `Banco.criar_conta` sem agência,
+   `Banco.__repr__`, `Pessoa.__repr__`), que estão fora do escopo desta
+   atividade. Isolando só a unidade analisada: **`Conta.transferir`
+   (linhas 39-66) tem 100% de cobertura de linhas e 100% de cobertura de
+   ramos** — todas as 5 decisões foram exercitadas nos dois sentidos
+   (Verdadeiro e Falso).
+3. **Nós e arestas do GFC cobertos?** Sim. Cada teste cobre a sequência de
+   nós indicada na coluna "Caminho" da tabela da seção 6; juntos, CT-01 a
+   CT-08 passam por todos os 14 nós e todas as 18 arestas do grafo pelo
+   menos uma vez, incluindo as saídas V e F de cada decisão.
+4. **Os 6 caminhos básicos foram exercitados?** Sim — CT-01 a CT-06
+   correspondem exatamente a P1-P6.
+5. **Trecho inalcançável, caminho inviável, retorno antecipado ou exceção
+   não coberta?** Não há trechos inalcançáveis nem exceções em
+   `transferir` (todas as regras de negócio retornam `(False, msg)` em
+   vez de lançar exceção). Os 5 retornos antecipados (linhas 48, 51, 54,
+   57, 60) foram todos exercitados por algum teste.
+6. **A ferramenta calculou a mesma complexidade manual?** Não — Radon
+   retornou **8**, enquanto o cálculo manual (contando cada `if` como uma
+   decisão) deu **6**. A diferença é a contagem dos operadores `and` das
+   linhas 53 e 56 como decisões adicionais (ver seção 4). Isso não
+   invalida os 6 caminhos básicos exercitados: eles continuam sendo os
+   caminhos linearmente independentes pela definição de McCabe simples;
+   a diferença está apenas em quantos *deveriam* existir teoricamente
+   segundo cada convenção de contagem. Os testes CT-07 e CT-08 cobrem
+   justamente as combinações extras de condições atômicas que a contagem
+   "8" do Radon está enxergando.
+7. **Defeito, ambiguidade de requisito ou oportunidade de refatoração?**
+   Nenhum defeito foi encontrado — todos os testes passaram no primeiro
+   commit da implementação. Uma **ambiguidade de requisito** foi
+   identificada e documentada no CT-08: a regra de negócio não impõe
+   restrição de banco para transferências originadas de Conta Poupança
+   (só a Conta Corrente tem essa restrição), permitindo Poupança →
+   Corrente entre bancos diferentes. Como **oportunidade de
+   refatoração**, o método `transferir` poderia extrair a validação de
+   tipo/banco de destino em funções auxiliares nomeadas (ex.:
+   `_poupanca_pode_transferir_para` / `_corrente_pode_transferir_para`)
+   para deixar cada regra de negócio testável isoladamente, mas isso não
+   foi feito para não alterar o código já analisado nesta atividade.
 
 ## 8. Conclusão e referências
 
-🔲 A PREENCHER após a execução dos testes e análise da seção 7.
+A unidade `Conta.transferir` foi validada com sucesso pelos 8 casos de
+teste planejados: os 6 caminhos básicos exigidos pela complexidade
+ciclomática (V(G)=6 pelo cálculo manual) foram todos exercitados, e mais
+2 casos adicionais (CT-07 e CT-08) garantiram a cobertura das condições
+compostas e revelaram uma ambiguidade de requisito no comportamento de
+transferências entre bancos para contas Poupança. A cobertura de linhas e
+ramos da unidade analisada chegou a 100%, mesmo com a cobertura total do
+arquivo em 75% — a diferença fica em métodos fora do escopo da atividade
+(`sacar`, `depositar`, `criar_conta`, `__repr__`), que podem ser
+cobertos em uma iteração futura caso a disciplina peça a extensão da
+análise a outras unidades. A divergência entre o cálculo manual (V(G)=6)
+e o resultado do Radon (8) foi documentada e explicada pela forma como
+cada abordagem conta condições compostas, sem necessidade de alterar o
+código-fonte.
 
 **Referências:** pytest, coverage.py / pytest-cov, Radon, Mermaid Live
-Editor (usado para o GFC desta seção 3).
+Editor (usado para o GFC da seção 3).

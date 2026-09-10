@@ -14,8 +14,12 @@ independentes e cobertura) sobre uma unidade de código real.
 |---|---|
 | [`models.py`](models.py) | Classes `Pessoa`, `Banco` e `Conta` com as regras de negócio (criação de conta, depósito, saque, transferência) |
 | [`main.py`](main.py) | Script de demonstração manual do fluxo (não é a suíte de testes) |
-| [`tests.py`](tests.py) | Esqueleto dos testes unitários (`pytest`) do método `Conta.transferir` — unidade analisada na atividade |
-| [`docs/relatorio-testes-caixa-branca.md`](docs/relatorio-testes-caixa-branca.md) | Relatório da atividade: GFC, complexidade ciclomática, caminhos independentes e casos de teste |
+| [`test_conta.py`](test_conta.py) | Testes unitários (`pytest`) do método `Conta.transferir` — unidade analisada na atividade (8 casos, CT-01 a CT-08) |
+| [`docs/relatorio-testes-caixa-branca.md`](docs/relatorio-testes-caixa-branca.md) | Relatório da atividade: GFC, complexidade ciclomática, caminhos independentes, casos de teste e resultados de execução/cobertura |
+
+> `tests.py` é o esqueleto original (stubs sem asserts) mantido apenas
+> como referência do planejamento inicial; a implementação final dos
+> testes está em `test_conta.py`.
 
 ### Regras de negócio implementadas
 
@@ -39,9 +43,14 @@ independentes e cobertura) sobre uma unidade de código real.
 python main.py
 ```
 
-### Como rodar os testes (quando implementados)
+### Como rodar os testes
 
 ```bash
-pytest tests.py -v
-pytest tests.py --cov=models --cov-branch --cov-report=html
+pytest test_conta.py -v
+pytest test_conta.py --cov=models --cov-branch --cov-report=html
+radon cc models.py -s
 ```
+
+Resultado atual: 8/8 testes passando, 100% de cobertura de linhas e ramos
+em `Conta.transferir` (unidade analisada). Detalhes completos em
+[`docs/relatorio-testes-caixa-branca.md`](docs/relatorio-testes-caixa-branca.md).
