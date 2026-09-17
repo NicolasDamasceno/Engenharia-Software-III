@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/user/Engenharia-Software-III
+plugins: cov-7.1.0
+collecting ... collected 4 items
+
+test_solicitar_conta.py::test_solicitar_conta_com_dados_validos_cria_conta PASSED [ 25%]
+test_solicitar_conta.py::test_solicitar_conta_rejeita_tipo_de_conta_invalido PASSED [ 50%]
+test_solicitar_conta.py::test_solicitar_conta_detecta_duplicidade_com_cpf_sem_pontuacao PASSED [ 75%]
+test_solicitar_conta.py::test_solicitar_conta_permite_mesmo_cpf_em_banco_diferente PASSED [100%]
+
+============================== 4 passed in 0.01s ===============================

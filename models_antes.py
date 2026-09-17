@@ -5,10 +5,6 @@ Sem dependências de banco de dados, rede ou interface gráfica.
 """
 
 
-def _apenas_digitos(texto):
-    return "".join(caractere for caractere in texto if caractere.isdigit())
-
-
 class Conta:
     TIPO_CORRENTE = "Corrente"
     TIPO_POUPANCA = "Poupança"
@@ -93,9 +89,6 @@ class Banco:
         if not self.lista_agencias:
             return None, "Banco não possui agências cadastradas"
 
-        if tipo_conta not in (Conta.TIPO_CORRENTE, Conta.TIPO_POUPANCA):
-            return None, "Tipo de conta inválido"
-
         numero_conta = len(self.lista_contas) + 1
         conta = Conta(numero_conta, self.lista_agencias[0], self.id_banco, pessoa.cpf, tipo_conta)
         self.lista_contas.append(conta)
@@ -112,10 +105,8 @@ class Pessoa:
         self.telefone = telefone
 
     def solicitar_conta(self, banco, tipo_conta):
-        cpf_solicitante = _apenas_digitos(self.cpf)
         for conta in banco.lista_contas:
-            mesmo_cpf = _apenas_digitos(conta.cpf_pessoa) == cpf_solicitante
-            if mesmo_cpf and conta.tipo_conta == tipo_conta:
+            if conta.cpf_pessoa == self.cpf and conta.tipo_conta == tipo_conta:
                 return None, "Pessoa já possui uma conta desse tipo neste banco"
 
         return banco.criar_conta(self, tipo_conta)
